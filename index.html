@@ -9,10 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/apex-charts/3.45.1/apexcharts.min.js"></script>
 </head>
 <body>
-    <!-- Notification Toast Container -->
     <div id="notificationContainer" class="notification-container"></div>
 
-    <!-- Voice Control Modal -->
     <div id="voiceModal" class="modal">
         <div class="modal-content voice-modal-content">
             <button class="modal-close" onclick="closeVoiceModal()">&times;</button>
@@ -27,7 +25,6 @@
         </div>
     </div>
 
-    <!-- Budget Modal -->
     <div id="budgetModal" class="modal">
         <div class="modal-content">
             <button class="modal-close" onclick="closeBudgetModal()">&times;</button>
@@ -42,9 +39,7 @@
         </div>
     </div>
 
-    <!-- Main Container -->
     <div class="dashboard-wrapper">
-        <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <div class="logo-section">
                 <div class="logo-icon">❄️</div>
@@ -57,8 +52,8 @@
                 <button class="nav-item" data-tab="analytics" onclick="switchTab('analytics')">
                     <span class="nav-icon">📊</span>
                 </button>
-                <button class="nav-item" data-tab="budgeting" onclick="switchTab('budgeting')">
-                    <span class="nav-icon">💰</span>
+                <button class="nav-item" data-tab="settings" onclick="switchTab('settings')">
+                    <span class="nav-icon">⚙️</span>
                 </button>
             </nav>
 
@@ -68,169 +63,200 @@
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Compact Header -->
             <header class="top-header">
                 <h1 id="pageTitle">Dashboard</h1>
             </header>
 
-            <!-- Content Area -->
             <div class="content-area">
 
                 <!-- ===== DASHBOARD TAB ===== -->
                 <div id="dashboard-tab" class="tab-content active">
-                    <!-- AC Model Display -->
-                    <div class="ac-model-section">
-                        <div class="ac-model-display">
-                            <div class="ac-model-image" id="acModelImage">
-                                🖼️
-                            </div>
-                            <div class="ac-model-info">
+                    <!-- AC Model -->
+                    <div class="ac-showcase">
+                        <div class="ac-device">
+                            <div class="ac-device-emoji" id="acModelImage">❄️</div>
+                            <div class="ac-info">
                                 <h3 id="acModelName">LG Smart AC</h3>
-                                <p id="acModelCode" class="model-code">Model: MS-Q24ENZA</p>
+                                <p id="acModelCode">Model: MS-Q24ENZA</p>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Stats Row -->
-                    <div class="stats-row">
-                        <div class="stat-mini">
-                            <span class="stat-mini-label">Temp</span>
-                            <span class="stat-mini-value" id="dashboardTemp">22°C</span>
+                    <!-- Cost Cards -->
+                    <div class="cost-cards">
+                        <div class="cost-card">
+                            <span class="cost-label">Today</span>
+                            <span class="cost-amount" id="costToday">₹10</span>
                         </div>
-                        <div class="stat-mini">
-                            <span class="stat-mini-label">Power</span>
-                            <span class="stat-mini-value" id="dashboardUsage">0.0 kW</span>
+                        <div class="cost-card">
+                            <span class="cost-label">Last Week</span>
+                            <span class="cost-amount" id="costWeek">₹170</span>
                         </div>
-                        <div class="stat-mini">
-                            <span class="stat-mini-label">Today</span>
-                            <span class="stat-mini-value" id="dashboardCost">₹0</span>
+                        <div class="cost-card">
+                            <span class="cost-label">This Month</span>
+                            <span class="cost-amount" id="costMonth">₹350</span>
                         </div>
                     </div>
 
-                    <!-- AC Control Card -->
+                    <!-- AC Control -->
                     <div class="card premium-card">
-                        <div class="ac-status-display">
-                            <div class="status-circle" id="statusCircle">
+                        <div class="ac-control-section">
+                            <div class="status-circle-large" id="statusCircle">
                                 <span id="acStatusText">OFF</span>
                             </div>
+                            <button class="btn-toggle" id="acToggleBtn" onclick="toggleAC()">Turn ON</button>
                         </div>
-                        <button class="btn-large" id="acToggleBtn" onclick="toggleAC()">Turn ON</button>
-                        
-                        <div class="mode-selector">
-                            <button class="mode-btn active" data-mode="cool" onclick="setACMode('cool')">Cool</button>
-                            <button class="mode-btn" data-mode="dry" onclick="setACMode('dry')">Dry</button>
-                            <button class="mode-btn" data-mode="fan" onclick="setACMode('fan')">Fan</button>
+
+                        <div class="mode-selector-full">
+                            <button class="mode-btn-full active" data-mode="cool" onclick="setACMode('cool')">
+                                <span class="mode-emoji">❄️</span>
+                                <span class="mode-text">Cool</span>
+                            </button>
+                            <button class="mode-btn-full" data-mode="dry" onclick="setACMode('dry')">
+                                <span class="mode-emoji">💧</span>
+                                <span class="mode-text">Dry</span>
+                            </button>
+                            <button class="mode-btn-full" data-mode="fan" onclick="setACMode('fan')">
+                                <span class="mode-emoji">🌬️</span>
+                                <span class="mode-text">Fan</span>
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Temperature Card -->
+                    <!-- Temperature -->
                     <div class="card premium-card">
-                        <div class="temp-display-large">
-                            <span class="temp-big" id="tempBig">22</span>
-                            <span class="temp-unit">°C</span>
+                        <h3 class="card-title">Temperature</h3>
+                        <div class="temp-control">
+                            <div class="temp-display">
+                                <span class="temp-value" id="tempBig">22</span>
+                                <span class="temp-unit">°C</span>
+                            </div>
+                            <input type="range" id="tempSlider" class="slider-premium" min="16" max="30" value="22" oninput="updateTemperature(this.value)">
+                            <div class="temp-controls">
+                                <button class="btn-temp" onclick="decreaseTemp()">−</button>
+                                <button class="btn-temp" onclick="increaseTemp()">+</button>
+                            </div>
                         </div>
-                        <input type="range" id="tempSlider" class="slider-advanced" min="16" max="30" value="22" oninput="updateTemperature(this.value)">
-                        <div class="slider-labels">
-                            <span>16</span>
-                            <span>30</span>
-                        </div>
-                        <div class="temp-buttons">
-                            <button class="btn-sm" onclick="decreaseTemp()">−</button>
-                            <button class="btn-sm" onclick="increaseTemp()">+</button>
-                        </div>
+                    </div>
+
+                    <!-- Power Chart -->
+                    <div class="card premium-card">
+                        <h3 class="card-title">24H Power Usage</h3>
+                        <canvas id="powerChart" height="70"></canvas>
                     </div>
 
                     <!-- Quick Actions -->
-                    <div class="quick-actions">
-                        <button class="action-btn" onclick="activateSleepMode()">😴 Sleep</button>
-                        <button class="action-btn" onclick="activateQuickCool()">🧊 Cool</button>
-                        <button class="action-btn" onclick="activateEcoMode()">🌿 Eco</button>
-                    </div>
-
-                    <!-- Real-time Chart -->
-                    <div class="card premium-card">
-                        <h3 class="chart-title">Today (24H)</h3>
-                        <canvas id="powerChart" height="60"></canvas>
+                    <div class="quick-actions-premium">
+                        <button class="action-btn-premium" onclick="activateSleepMode()">
+                            <span class="action-emoji">😴</span>
+                            <span class="action-text">Sleep</span>
+                        </button>
+                        <button class="action-btn-premium" onclick="activateQuickCool()">
+                            <span class="action-emoji">🧊</span>
+                            <span class="action-text">Cool</span>
+                        </button>
+                        <button class="action-btn-premium" onclick="activateEcoMode()">
+                            <span class="action-emoji">🌿</span>
+                            <span class="action-text">Eco</span>
+                        </button>
                     </div>
                 </div>
 
                 <!-- ===== ANALYTICS TAB ===== -->
                 <div id="analytics-tab" class="tab-content">
                     <div class="card premium-card">
-                        <h3 class="chart-title">Daily</h3>
+                        <h3 class="card-title">Daily Usage</h3>
                         <canvas id="dailyChart" height="200"></canvas>
                     </div>
 
                     <div class="card premium-card">
-                        <h3 class="chart-title">Weekly</h3>
+                        <h3 class="card-title">Weekly Trend</h3>
                         <canvas id="weeklyChart" height="200"></canvas>
                     </div>
 
                     <div class="card premium-card">
-                        <h3 class="chart-title">Monthly Trend</h3>
-                        <div id="monthlyChart" style="height: 300px;"></div>
+                        <h3 class="card-title">Monthly Overview</h3>
+                        <div id="monthlyChart" style="height: 280px;"></div>
                     </div>
 
-                    <!-- Usage Stats -->
-                    <div class="stats-mini-grid">
-                        <div class="stat-box">
+                    <div class="stats-grid">
+                        <div class="stat-card-analytics">
                             <span class="stat-label">Avg Daily</span>
-                            <span class="stat-val" id="avgDaily">0.0 kWh</span>
+                            <span class="stat-value" id="avgDaily">1.2 kWh</span>
                         </div>
-                        <div class="stat-box">
+                        <div class="stat-card-analytics">
                             <span class="stat-label">Peak Hour</span>
-                            <span class="stat-val" id="peakHour">2 PM</span>
+                            <span class="stat-value" id="peakHour">2 PM</span>
                         </div>
-                        <div class="stat-box">
-                            <span class="stat-label">This Month</span>
-                            <span class="stat-val" id="totalMonth">0 kWh</span>
+                        <div class="stat-card-analytics">
+                            <span class="stat-label">Total Usage</span>
+                            <span class="stat-value" id="totalUsage">43.8 kWh</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- ===== BUDGET TAB ===== -->
-                <div id="budgeting-tab" class="tab-content">
-                    <!-- Budget Overview -->
+                <!-- ===== SETTINGS TAB ===== -->
+                <div id="settings-tab" class="tab-content">
                     <div class="card premium-card">
-                        <h3 class="chart-title">Monthly Budget</h3>
-                        <div class="budget-display">
-                            <div class="budget-gauge">
-                                <svg viewBox="0 0 100 100" id="budgetGauge">
-                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e0e0e0" stroke-width="8"/>
-                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#ff6b6b" stroke-width="8" 
-                                            stroke-dasharray="0 188.4" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+                        <h3 class="card-title">Monthly Budget</h3>
+                        <div class="budget-section">
+                            <div class="budget-gauge-wrapper">
+                                <svg viewBox="0 0 100 100" class="budget-gauge">
+                                    <circle cx="50" cy="50" r="40" fill="none" stroke="#e0e0e0" stroke-width="6"/>
+                                    <circle cx="50" cy="50" r="40" fill="none" stroke="#00d4ff" stroke-width="6" 
+                                            stroke-dasharray="30 251.2" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
                                 </svg>
-                                <div class="budget-text">
-                                    <span class="budget-used" id="budgetUsed">₹0</span>
-                                    <span class="budget-total" id="budgetTotal">/ ₹500</span>
+                                <div class="budget-center">
+                                    <span class="budget-percent" id="budgetPercent">12%</span>
+                                </div>
+                            </div>
+                            <div class="budget-details">
+                                <div class="budget-detail-item">
+                                    <span>Used</span>
+                                    <span class="budget-detail-value" id="budgetUsed">₹60</span>
+                                </div>
+                                <div class="budget-detail-item">
+                                    <span>Total</span>
+                                    <span class="budget-detail-value" id="budgetTotal">₹500</span>
+                                </div>
+                                <div class="budget-detail-item">
+                                    <span>Remaining</span>
+                                    <span class="budget-detail-value" id="budgetRemain">₹440</span>
                                 </div>
                             </div>
                         </div>
                         <button class="btn-primary full-width" onclick="openBudgetModal()">Edit Budget</button>
                     </div>
 
-                    <!-- Daily Costs -->
                     <div class="card premium-card">
-                        <h3 class="chart-title">Daily Costs</h3>
-                        <canvas id="costChart" height="80"></canvas>
+                        <h3 class="card-title">Daily Costs</h3>
+                        <canvas id="costChart" height="150"></canvas>
                     </div>
 
-                    <!-- Remaining -->
                     <div class="card premium-card">
-                        <div class="remaining-display">
-                            <div class="remaining-amount" id="remainingAmount">₹500</div>
-                            <div class="remaining-days">Balance Available</div>
+                        <h3 class="card-title">Device Info</h3>
+                        <div class="device-info">
+                            <div class="info-row">
+                                <span class="info-label">AC Model</span>
+                                <span class="info-value" id="infoModel">LG Smart Inverter</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Electricity Rate</span>
+                                <span class="info-value">₹8/kWh</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Status</span>
+                                <span class="info-value info-status" id="infoStatus">OFF</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
             </div>
 
-            <!-- Minimal Footer -->
             <footer class="main-footer">
-                <p>Last updated: <span id="lastUpdate">just now</span></p>
+                <p>Last updated: <span id="lastUpdate">now</span></p>
             </footer>
         </main>
     </div>
