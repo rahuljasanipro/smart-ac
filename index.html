@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<title>Smart AC Dashboard</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<header>
+<h1>❄ Smart AC Dashboard</h1>
+
+<div class="controls">
+<button id="acToggle">AC OFF</button>
+<button id="darkMode">🌙</button>
+</div>
+
+</header>
+
+
+<div class="dashboard">
+
+<div class="card">
+<h3>Date</h3>
+<p id="date"></p>
+</div>
+
+<div class="card">
+<h3>Temperature</h3>
+<p id="tempValue">24°C</p>
+<input type="range" id="tempSlider" min="16" max="30" value="24">
+</div>
+
+<div class="card">
+<h3>Today's Usage</h3>
+<p id="todayUsage">0 kWh</p>
+</div>
+
+<div class="card">
+<h3>Weekly Usage</h3>
+<p id="weeklyUsage">0 kWh</p>
+</div>
+
+<div class="card">
+<h3>Electricity Cost</h3>
+<p id="cost">₹0</p>
+</div>
+
+</div>
+
+
+<div class="chartCard">
+<h3>Weekly Energy Usage</h3>
+<canvas id="energyChart"></canvas>
+</div>
+
+
+<div class="center">
+<button id="simulateBtn">Simulate AC Usage</button>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
