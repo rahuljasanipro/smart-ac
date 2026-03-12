@@ -1,9 +1,8 @@
 // ============================================
-// MOBILE-OPTIMIZED SMART AC DASHBOARD
-// Essential Features Only
+// PREMIUM SMART AC DASHBOARD
+// Full-Featured with Beautiful UI
 // ============================================
 
-// LG AC Models Database
 const LG_AC_MODELS = [
     { name: "LG Smart Inverter", code: "MS-Q24ENZA", emoji: "❄️" },
     { name: "LG Dual Inverter", code: "MS-Q18UFOA", emoji: "🧊" },
@@ -12,29 +11,29 @@ const LG_AC_MODELS = [
     { name: "LG Ultra Quiet", code: "MS-Q22BEZA", emoji: "🔇" },
 ];
 
-// State Management
 const state = {
     acStatus: false,
     acMode: 'cool',
     temperature: 22,
-    usageToday: 0,
-    usageWeekly: [1.2, 1.5, 1.3, 2.1, 1.8, 2.5, 1.9],
-    costToday: 0,
+    costToday: 10,
+    costWeek: 170,
+    costMonth: 350,
     monthlyBudget: 500,
     darkMode: localStorage.getItem('darkMode') === 'true',
     acModel: JSON.parse(localStorage.getItem('acModel')) || LG_AC_MODELS[0],
+    usageWeekly: [1.2, 1.5, 1.3, 2.1, 1.8, 2.5, 1.9],
 };
 
-const ELECTRICITY_RATE = 8; // ₹ per kWh
+const ELECTRICITY_RATE = 8;
 let charts = {};
 
 // ============================================
-// INITIALIZATION
+// INIT
 // ============================================
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeDarkMode();
-    initializeACModel();
+    updateACModel();
     initializeCharts();
     attachEventListeners();
     updateDisplay();
@@ -62,31 +61,21 @@ function toggleDarkMode() {
 // AC MODEL
 // ============================================
 
-function initializeACModel() {
-    updateACModelDisplay();
-}
-
-function updateACModelDisplay() {
+function updateACModel() {
     document.getElementById('acModelImage').textContent = state.acModel.emoji;
     document.getElementById('acModelName').textContent = state.acModel.name;
     document.getElementById('acModelCode').textContent = 'Model: ' + state.acModel.code;
-}
-
-function randomizeACModel() {
-    state.acModel = LG_AC_MODELS[Math.floor(Math.random() * LG_AC_MODELS.length)];
-    localStorage.setItem('acModel', JSON.stringify(state.acModel));
-    updateACModelDisplay();
+    document.getElementById('infoModel').textContent = state.acModel.name;
 }
 
 // ============================================
-// TAB NAVIGATION
+// TABS
 // ============================================
 
 function switchTab(tabName) {
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
     });
-
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
     });
@@ -101,10 +90,10 @@ function switchTab(tabName) {
     const titles = {
         dashboard: 'Dashboard',
         analytics: 'Analytics',
-        budgeting: 'Budget'
+        settings: 'Settings'
     };
 
-    document.getElementById('pageTitle').textContent = titles[tabName] || 'Dashboard';
+    document.getElementById('pageTitle').textContent = titles[tabName];
 
     if (tabName === 'analytics') {
         setTimeout(() => {
@@ -123,12 +112,12 @@ function toggleAC() {
     state.acStatus = !state.acStatus;
     updateDisplay();
     saveState();
-    showToast(state.acStatus ? '❄️ AC Turned ON' : '🔌 AC Turned OFF', 'info');
+    showToast(state.acStatus ? '❄️ AC Turned ON' : '🔌 AC Turned OFF');
 }
 
 function setACMode(mode) {
     state.acMode = mode;
-    document.querySelectorAll('.mode-btn').forEach(btn => {
+    document.querySelectorAll('.mode-btn-full').forEach(btn => {
         btn.classList.remove('active');
     });
     document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
@@ -138,7 +127,7 @@ function setACMode(mode) {
 function activateSleepMode() {
     state.temperature = Math.min(state.temperature + 2, 30);
     updateTemperature();
-    showToast('😴 Sleep mode activated', 'success');
+    showToast('😴 Sleep mode activated');
 }
 
 function activateQuickCool() {
@@ -146,17 +135,17 @@ function activateQuickCool() {
     state.acStatus = true;
     updateTemperature();
     updateDisplay();
-    showToast('🧊 Quick cool activated', 'success');
+    showToast('🧊 Quick cool activated');
 }
 
 function activateEcoMode() {
     state.temperature = 24;
     updateTemperature();
-    showToast('🌿 Eco mode activated', 'success');
+    showToast('🌿 Eco mode activated');
 }
 
 // ============================================
-// TEMPERATURE CONTROL
+// TEMPERATURE
 // ============================================
 
 function updateTemperature(value = null) {
@@ -165,7 +154,6 @@ function updateTemperature(value = null) {
     }
     document.getElementById('tempBig').textContent = state.temperature;
     document.getElementById('tempSlider').value = state.temperature;
-    document.getElementById('dashboardTemp').textContent = state.temperature + '°C';
     saveState();
 }
 
@@ -204,7 +192,7 @@ function startVoiceControl() {
         } else {
             clearInterval(interval);
             closeVoiceModal();
-            showToast('✅ Command executed', 'success');
+            showToast('✅ Command executed');
         }
     }, 1500);
 }
@@ -218,7 +206,7 @@ function stopVoiceControl() {
 }
 
 // ============================================
-// BUDGET MANAGEMENT
+// BUDGET
 // ============================================
 
 function openBudgetModal() {
@@ -236,75 +224,72 @@ function saveBudget() {
         state.monthlyBudget = budget;
         localStorage.setItem('smartACBudget', budget);
         closeBudgetModal();
-        updateBudgetDisplay();
-        showToast('💳 Budget updated', 'success');
+        updateDisplay();
+        showToast('💳 Budget updated');
     }
 }
 
 // ============================================
-// DISPLAY UPDATES
+// DISPLAY
 // ============================================
 
 function updateDisplay() {
     updateACStatus();
-    updatePowerConsumption();
+    updateCostDisplay();
     updateBudgetDisplay();
 }
 
 function updateACStatus() {
     const statusCircle = document.getElementById('statusCircle');
     const acToggleBtn = document.getElementById('acToggleBtn');
+    const infoStatus = document.getElementById('infoStatus');
 
     if (state.acStatus) {
         statusCircle.textContent = 'ON';
         statusCircle.classList.remove('off');
         acToggleBtn.textContent = 'Turn OFF';
         acToggleBtn.classList.remove('off');
+        infoStatus.textContent = 'ON';
+        infoStatus.classList.add('on');
     } else {
         statusCircle.textContent = 'OFF';
         statusCircle.classList.add('off');
         acToggleBtn.textContent = 'Turn ON';
         acToggleBtn.classList.add('off');
+        infoStatus.textContent = 'OFF';
+        infoStatus.classList.remove('on');
     }
 }
 
-function updatePowerConsumption() {
-    if (state.acStatus) {
-        const baseUsage = 0.5;
-        const tempFactor = Math.abs(state.temperature - 22) * 0.05;
-        const randomFactor = Math.random() * 0.1;
-        const usage = baseUsage + tempFactor + randomFactor;
-        state.usageToday += usage / 100;
-        state.costToday = state.usageToday * ELECTRICITY_RATE;
-    }
-
-    document.getElementById('dashboardUsage').textContent = (state.usageToday / 10).toFixed(1) + ' kW';
-    document.getElementById('dashboardCost').textContent = '₹' + Math.round(state.costToday);
+function updateCostDisplay() {
+    document.getElementById('costToday').textContent = '₹' + state.costToday;
+    document.getElementById('costWeek').textContent = '₹' + state.costWeek;
+    document.getElementById('costMonth').textContent = '₹' + state.costMonth;
 }
 
 function updateBudgetDisplay() {
-    const remaining = state.monthlyBudget - state.costToday;
-    const percentage = (state.costToday / state.monthlyBudget) * 100;
+    const percentage = (state.costMonth / state.monthlyBudget) * 100;
+    const remaining = state.monthlyBudget - state.costMonth;
 
-    document.getElementById('budgetUsed').textContent = '₹' + Math.round(state.costToday);
-    document.getElementById('budgetTotal').textContent = '/ ₹' + state.monthlyBudget;
-    document.getElementById('remainingAmount').textContent = '₹' + Math.max(0, Math.round(remaining));
+    document.getElementById('budgetPercent').textContent = Math.round(percentage) + '%';
+    document.getElementById('budgetUsed').textContent = '₹' + Math.round(state.costMonth);
+    document.getElementById('budgetTotal').textContent = '₹' + state.monthlyBudget;
+    document.getElementById('budgetRemain').textContent = '₹' + Math.max(0, Math.round(remaining));
 
     // Update gauge
-    const circumference = 188.4;
+    const circumference = 251.2;
     const strokeDash = Math.min((percentage / 100) * circumference, circumference);
-    const circle = document.querySelector('#budgetGauge circle:nth-child(2)');
+    const circle = document.querySelector('.budget-gauge circle:nth-child(2)');
     if (circle) {
         circle.style.strokeDasharray = strokeDash + ' ' + circumference;
-    }
-
-    // Change color based on usage
-    if (percentage > 80) {
-        circle.style.stroke = '#ff6b6b';
-    } else if (percentage > 60) {
-        circle.style.stroke = '#f39c12';
-    } else {
-        circle.style.stroke = '#00d4ff';
+        
+        if (percentage > 80) {
+            circle.style.stroke = '#ff6b6b';
+        } else if (percentage > 60) {
+            circle.style.stroke = '#f39c12';
+        } else {
+            circle.style.stroke = '#00d4ff';
+        }
     }
 }
 
@@ -324,7 +309,7 @@ function initPowerChart() {
     const ctx = document.getElementById('powerChart');
     if (!ctx) return;
 
-    const data24h = Array.from({ length: 24 }, () => Math.random() * 2 + 0.5);
+    const data24h = Array.from({ length: 24 }, () => Math.random() * 2.5 + 0.5);
 
     if (charts.power) charts.power.destroy();
     charts.power = new Chart(ctx, {
@@ -339,6 +324,7 @@ function initPowerChart() {
                 fill: true,
                 tension: 0.4,
                 pointRadius: 0,
+                borderWidth: 2,
             }]
         },
         options: {
@@ -346,8 +332,8 @@ function initPowerChart() {
             maintainAspectRatio: true,
             plugins: { legend: { display: false } },
             scales: {
-                y: { beginAtZero: true, max: 3 },
-                x: { display: true }
+                y: { beginAtZero: true, max: 3, ticks: { color: '#64748b' } },
+                x: { ticks: { color: '#64748b' } }
             }
         }
     });
@@ -366,13 +352,14 @@ function initDailyChart() {
                 label: 'Usage (kWh)',
                 data: [0.5, 1.2, 2.1, 2.8, 1.9, 0.5],
                 backgroundColor: '#00d4ff',
-                borderRadius: 6
+                borderRadius: 8,
+                borderColor: 'transparent'
             }]
         },
         options: {
             responsive: true,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
+            scales: { y: { beginAtZero: true, ticks: { color: '#64748b' } } }
         }
     });
 }
@@ -392,13 +379,16 @@ function initWeeklyChart() {
                 borderColor: '#00d4ff',
                 backgroundColor: 'rgba(0, 212, 255, 0.1)',
                 fill: true,
-                tension: 0.4
+                tension: 0.4,
+                borderWidth: 2,
+                pointRadius: 4,
+                pointBackgroundColor: '#00d4ff'
             }]
         },
         options: {
             responsive: true,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
+            scales: { y: { beginAtZero: true, ticks: { color: '#64748b' } } }
         }
     });
 }
@@ -408,16 +398,17 @@ function initMonthlyChart() {
     if (!container) return;
 
     const data = Array.from({ length: 30 }, (_, i) => 
-        15 + Math.random() * 20 + Math.sin(i * 0.2) * 5
+        8 + Math.random() * 5 + Math.sin(i * 0.2) * 2
     );
 
     const options = {
-        chart: { type: 'area', height: 300, sparkline: { enabled: false } },
-        series: [{ name: 'Daily Usage (kWh)', data: data }],
+        chart: { type: 'area', height: 280, sparkline: { enabled: false } },
+        series: [{ name: 'Daily Cost (₹)', data: data }],
         colors: ['#00d4ff'],
-        stroke: { curve: 'smooth', width: 2 },
-        fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0.05 } },
-        tooltip: { theme: document.body.classList.contains('dark-mode') ? 'dark' : 'light' }
+        stroke: { curve: 'smooth', width: 2.5 },
+        fill: { type: 'gradient', gradient: { opacityFrom: 0.45, opacityTo: 0.05 } },
+        xaxis: { labels: { style: { colors: '#64748b' } } },
+        yaxis: { labels: { style: { colors: '#64748b' } } },
     };
 
     if (charts.monthly) charts.monthly.destroy();
@@ -429,7 +420,7 @@ function initCostChart() {
     const ctx = document.getElementById('costChart');
     if (!ctx) return;
 
-    const costs = state.usageWeekly.map(usage => usage * ELECTRICITY_RATE);
+    const costs = state.usageWeekly.map(u => u * ELECTRICITY_RATE);
 
     if (charts.cost) charts.cost.destroy();
     charts.cost = new Chart(ctx, {
@@ -440,13 +431,13 @@ function initCostChart() {
                 label: 'Cost (₹)',
                 data: costs,
                 backgroundColor: costs.map(c => c > 20 ? '#ff6b6b' : c > 12 ? '#f39c12' : '#2ecc71'),
-                borderRadius: 6
+                borderRadius: 8
             }]
         },
         options: {
             responsive: true,
             plugins: { legend: { display: false } },
-            scales: { y: { beginAtZero: true } }
+            scales: { y: { beginAtZero: true, ticks: { color: '#64748b' } } }
         }
     });
 }
@@ -455,11 +446,11 @@ function initCostChart() {
 // NOTIFICATIONS
 // ============================================
 
-function showToast(message, type = 'info') {
+function showToast(message) {
     const container = document.getElementById('notificationContainer');
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.innerHTML = `<span>${message}</span>`;
+    toast.className = 'toast';
+    toast.textContent = message;
 
     container.appendChild(toast);
 
@@ -491,38 +482,38 @@ function attachEventListeners() {
 
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
-            document.querySelectorAll('.modal.active').forEach(modal => {
-                modal.classList.remove('active');
+            document.querySelectorAll('.modal.active').forEach(m => {
+                m.classList.remove('active');
             });
         }
     });
 }
 
 // ============================================
-// AUTO UPDATES
+// AUTO UPDATE
 // ============================================
 
 function startAutoUpdates() {
-    setInterval(updateDisplay, 3000);
+    setInterval(() => {
+        if (state.acStatus) {
+            state.costToday += Math.random() * 0.5;
+            updateDisplay();
+        }
+    }, 5000);
 
     setInterval(() => {
-        const now = new Date();
-        const diff = Math.floor((now - new Date()) / 1000);
-        document.getElementById('lastUpdate').textContent = 'just now';
+        document.getElementById('lastUpdate').textContent = 'now';
     }, 30000);
 }
 
 // ============================================
-// LOCAL STORAGE
+// STORAGE
 // ============================================
 
 function saveState() {
     localStorage.setItem('smartACState', JSON.stringify({
         acStatus: state.acStatus,
-        acMode: state.acMode,
         temperature: state.temperature,
-        usageToday: state.usageToday,
-        costToday: state.costToday,
         darkMode: state.darkMode
     }));
 }
