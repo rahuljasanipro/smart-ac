@@ -1,0 +1,95 @@
+body{
+font-family: Arial, sans-serif;
+background:#f4f6fb;
+margin:0;
+padding:0;
+text-align:center;
+transition:0.3s;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 40px;
+background:white;
+box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+h1{
+margin:0;
+}
+
+.controls button{
+margin-left:10px;
+padding:8px 14px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+background:#007bff;
+color:white;
+}
+
+.dashboard{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:20px;
+padding:40px;
+}
+
+.card{
+background:white;
+padding:20px;
+border-radius:12px;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.card h3{
+margin-bottom:10px;
+}
+
+.card p{
+font-size:20px;
+font-weight:bold;
+}
+
+.chartCard{
+width:80%;
+margin:auto;
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 4px 12px rgba(0,0,0,0.08);
+}
+
+.center{
+margin:30px;
+}
+
+#simulateBtn{
+padding:12px 24px;
+font-size:16px;
+border:none;
+border-radius:8px;
+background:#28a745;
+color:white;
+cursor:pointer;
+}
+
+input[type=range]{
+width:100%;
+}
+
+.dark{
+background:#1e1e1e;
+color:white;
+}
+
+.dark header{
+background:#2b2b2b;
+}
+
+.dark .card,
+.dark .chartCard{
+background:#2b2b2b;
+}
