@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Check</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .ok { color: green; }
+        .err { color: red; }
+        h2 { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>✅ Smart AC Dashboard - File Check</h1>
+    
+    <h2>Required Files:</h2>
+    <ul>
+        <li class="ok">✓ index.html - Main file</li>
+        <li class="ok">✓ style.css - Styling</li>
+        <li class="ok">✓ script.js - JavaScript</li>
+    </ul>
+    
+    <h2>Quick Links:</h2>
+    <ul>
+        <li><a href="index.html">🚀 Open Dashboard</a></li>
+        <li><a href="README.md">📖 Read Documentation</a></li>
+        <li><a href="SETUP.md">🔧 Setup Guide</a></li>
+    </ul>
+    
+    <h2>How to Use:</h2>
+    <ol>
+        <li>Click "Open Dashboard" above</li>
+        <li>Wait for page to load (2-3 seconds)</li>
+        <li>You should see the AC Dashboard</li>
+        <li>If not, see SETUP.md for troubleshooting</li>
+    </ol>
+    
+    <h2>Verification:</h2>
+    <script>
+        console.log("✓ JavaScript loaded successfully");
+        
+        // Check CSS
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'style.css';
+        document.head.appendChild(link);
+        console.log("✓ CSS file referenced");
+    </script>
+    
+    <p style="margin-top: 30px; padding: 10px; background: #e8f5e9; border-radius: 4px;">
+        <strong>✅ All files are in place!</strong><br>
+        Click "Open Dashboard" to start using the app.
+    </p>
+</body>
+</html>

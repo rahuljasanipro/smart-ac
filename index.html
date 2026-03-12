@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart AC Dashboard - Professional</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/apex-charts/3.45.1/apexcharts.min.js"></script>
+</head>
+<body>
+    <!-- Notification Toast Container -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Voice Control Modal -->
+    <div id="voiceModal" class="modal">
+        <div class="modal-content voice-modal-content">
+            <button class="modal-close" onclick="closeVoiceModal()">&times;</button>
+            <div class="voice-visualizer">
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+                <div class="voice-wave"></div>
+            </div>
+            <h2>Voice Control Active</h2>
+            <p id="voiceText">Listening...</p>
+            <button class="btn-primary" onclick="stopVoiceControl()">Stop Listening</button>
+        </div>
+    </div>
+
+    <!-- Budget Alert Modal -->
+    <div id="budgetModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeBudgetModal()">&times;</button>
+            <h2>Budget Management</h2>
+            <div class="budget-form">
+                <div class="form-group">
+                    <label>Monthly Budget (₹)</label>
+                    <input type="number" id="budgetInput" class="form-input" placeholder="Enter your budget" min="0" step="100">
+                </div>
+                <div class="form-group">
+                    <label>Alert Threshold (%)</label>
+                    <input type="number" id="thresholdInput" class="form-input" placeholder="Alert at 80%" min="0" max="100" value="80">
+                </div>
+                <button class="btn-primary" onclick="saveBudget()">Save Budget</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="dashboard-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="logo-icon">❄️</div>
+                <h1 class="logo-text">CoolVault</h1>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Dashboard</span>
+                </button>
+                <button class="nav-item" data-tab="analytics" onclick="switchTab('analytics')">
+                    <span class="nav-icon">📈</span>
+                    <span class="nav-label">Analytics</span>
+                </button>
+                <button class="nav-item" data-tab="efficiency" onclick="switchTab('efficiency')">
+                    <span class="nav-icon">🔋</span>
+                    <span class="nav-label">Efficiency</span>
+                </button>
+                <button class="nav-item" data-tab="budgeting" onclick="switchTab('budgeting')">
+                    <span class="nav-icon">💰</span>
+                    <span class="nav-label">Budget</span>
+                </button>
+                <button class="nav-item" data-tab="reports" onclick="switchTab('reports')">
+                    <span class="nav-icon">📄</span>
+                    <span class="nav-label">Reports</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="btn-voice" id="voiceBtn" onclick="startVoiceControl()">
+                    <span>🎤</span> Voice Control
+                </button>
+                <button class="btn-theme-toggle" id="themeToggle" onclick="toggleDarkMode()">
+                    🌙
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <p id="pageSubtitle">Real-time AC Management</p>
+                </div>
+                <div class="header-right">
+                    <div class="search-box">
+                        <input type="text" placeholder="Search settings..." class="search-input">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                    <button class="btn-budget" onclick="openBudgetModal()">
+                        💳 Budget: <span id="budgetDisplay">Not Set</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div class="content-area">
+
+                <!-- ===== DASHBOARD TAB ===== -->
+                <div id="dashboard-tab" class="tab-content active">
+                    <!-- Quick Stats Row -->
+                    <div class="stats-grid">
+                        <div class="stat-card premium">
+                            <div class="stat-icon">🌡️</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Current Temp</span>
+                                <span class="stat-value" id="dashboardTemp">22°C</span>
+                            </div>
+                            <div class="stat-badge">Cool Mode</div>
+                        </div>
+                        <div class="stat-card premium">
+                            <div class="stat-icon">⚡</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Power Usage</span>
+                                <span class="stat-value" id="dashboardUsage">0.0 kW</span>
+                            </div>
+                            <div class="stat-badge">Active</div>
+                        </div>
+                        <div class="stat-card premium">
+                            <div class="stat-icon">💵</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Today's Cost</span>
+                                <span class="stat-value" id="dashboardCost">₹0.00</span>
+                            </div>
+                            <div class="stat-badge" id="costBadge">Normal</div>
+                        </div>
+                        <div class="stat-card premium">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-info">
+                                <span class="stat-label">Efficiency</span>
+                                <span class="stat-value" id="efficiencyScore">A+</span>
+                            </div>
+                            <div class="stat-badge" id="efficiencyBadge">Excellent</div>
+                        </div>
+                    </div>
+
+                    <!-- Main Control Panel -->
+                    <div class="grid-2">
+                        <!-- AC Control Card -->
+                        <div class="card premium-card">
+                            <div class="card-header">
+                                <h2>AC Control</h2>
+                                <span class="status-dot" id="statusDot"></span>
+                            </div>
+                            <div class="card-body">
+                                <div class="ac-status-display">
+                                    <div class="status-circle" id="statusCircle">
+                                        <span id="acStatusText">OFF</span>
+                                    </div>
+                                </div>
+                                <button class="btn-large" id="acToggleBtn" onclick="toggleAC()">Turn ON</button>
+                                
+                                <div class="mode-selector">
+                                    <button class="mode-btn active" data-mode="cool" onclick="setACMode('cool')">Cool</button>
+                                    <button class="mode-btn" data-mode="dry" onclick="setACMode('dry')">Dry</button>
+                                    <button class="mode-btn" data-mode="fan" onclick="setACMode('fan')">Fan</button>
+                                    <button class="mode-btn" data-mode="heat" onclick="setACMode('heat')">Heat</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Temperature Control Card -->
+                        <div class="card premium-card">
+                            <div class="card-header">
+                                <h2>Temperature Control</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="temp-display-large">
+                                    <div class="temp-visual">
+                                        <span class="temp-big" id="tempBig">22</span>
+                                        <span class="temp-unit">°C</span>
+                                    </div>
+                                </div>
+                                <input type="range" id="tempSlider" class="slider-advanced" min="16" max="30" value="22" oninput="updateTemperature(this.value)">
+                                <div class="slider-labels">
+                                    <span>16</span>
+                                    <span>30</span>
+                                </div>
+                                <div class="temp-buttons">
+                                    <button class="btn-sm" onclick="decreaseTemp()">−</button>
+                                    <button class="btn-sm" onclick="increaseTemp()">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Real-time Chart -->
+                    <div class="card premium-card full-width">
+                        <div class="card-header">
+                            <h2>Real-time Power Consumption (Last 24 Hours)</h2>
+                            <div class="chart-controls">
+                                <button class="btn-sm" onclick="updateChartRange('1h')">1H</button>
+                                <button class="btn-sm" onclick="updateChartRange('6h')">6H</button>
+                                <button class="btn-sm active" onclick="updateChartRange('24h')">24H</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="powerChart" height="80"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="grid-3">
+                        <div class="action-card">
+                            <div class="action-icon">🌙</div>
+                            <h3>Sleep Mode</h3>
+                            <p>Gradually increase temperature by 2°C</p>
+                            <button class="btn-secondary" onclick="activateSleepMode()">Activate</button>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">🧊</div>
+                            <h3>Quick Cool</h3>
+                            <p>Set to 18°C for 30 minutes</p>
+                            <button class="btn-secondary" onclick="activateQuickCool()">Activate</button>
+                        </div>
+                        <div class="action-card">
+                            <div class="action-icon">🌿</div>
+                            <h3>Eco Mode</h3>
+                            <p>Optimize for energy savings</p>
+                            <button class="btn-secondary" onclick="activateEcoMode()">Activate</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== ANALYTICS TAB ===== -->
+                <div id="analytics-tab" class="tab-content">
+                    <div class="grid-2">
+                        <!-- Daily Usage Chart -->
+                        <div class="card premium-card">
+                            <div class="card-header">
+                                <h2>Daily Energy Usage</h2>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="dailyChart" height="300"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- Weekly Comparison -->
+                        <div class="card premium-card">
+                            <div class="card-header">
+                                <h2>Weekly Comparison</h2>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="weeklyChart" height="300"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Trend -->
+                    <div class="card premium-card full-width">
+                        <div class="card-header">
+                            <h2>Monthly Energy Trend</h2>
+                        </div>
+                        <div class="card-body">
+                            <div id="monthlyChart"></div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Statistics -->
+                    <div class="grid-3">
+                        <div class="stat-box">
+                            <h3>Peak Usage Hour</h3>
+                            <p class="stat-number" id="peakHour">2 PM</p>
+                            <p class="stat-detail">3.5 kW</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3>Average Daily</h3>
+                            <p class="stat-number" id="avgDaily">8.2</p>
+                            <p class="stat-detail">kWh/day</p>
+                        </div>
+                        <div class="stat-box">
+                            <h3>Total This Month</h3>
+                            <p class="stat-number" id="totalMonth">246</p>
+                            <p class="stat-detail">kWh</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== EFFICIENCY TAB ===== -->
+                <div id="efficiency-tab" class="tab-content">
+                    <!-- Efficiency Score -->
+                    <div class="card premium-card full-width">
+                        <div class="card-header">
+                            <h2>Energy Efficiency Rating</h2>
+                        </div>
+                        <div class="card-body efficiency-rating">
+                            <div class="rating-circle">
+                                <svg viewBox="0 0 100 100" id="efficiencyGauge">
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                                    <circle cx="50" cy="50" r="45" fill="none" stroke="#2ecc71" stroke-width="8" 
+                                            stroke-dasharray="141.3 188.4" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+                                </svg>
+                                <div class="rating-text">
+                                    <span class="rating-grade" id="ratingGrade">A+</span>
+                                    <span class="rating-percent" id="ratingPercent">92%</span>
+                                </div>
+                            </div>
+                            <div class="rating-details">
+                                <h3>Excellent Efficiency</h3>
+                                <p>Your AC is performing optimally. Keep it up!</p>
+                                <div class="efficiency-factors">
+                                    <div class="factor">
+                                        <span class="factor-name">Temperature Consistency</span>
+                                        <div class="factor-bar">
+                                            <div class="factor-fill" style="width: 95%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="factor">
+                                        <span class="factor-name">Power Optimization</span>
+                                        <div class="factor-bar">
+                                            <div class="factor-fill" style="width: 88%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="factor">
+                                        <span class="factor-name">Usage Patterns</span>
+                                        <div class="factor-bar">
+                                            <div class="factor-fill" style="width: 92%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="grid-2">
+                        <div class="card recommendation-card">
+                            <div class="rec-icon">💡</div>
+                            <h3>Smart Scheduling</h3>
+                            <p>Pre-cool your room before arriving home to save 20% energy</p>
+                            <button class="btn-secondary" onclick="showToast('Scheduling feature coming soon!')">Learn More</button>
+                        </div>
+                        <div class="card recommendation-card">
+                            <div class="rec-icon">🌡️</div>
+                            <h3>Temperature Tips</h3>
+                            <p>Setting to 24°C instead of 22°C saves ₹45/day</p>
+                            <button class="btn-secondary" onclick="setTemp(24)">Apply</button>
+                        </div>
+                        <div class="card recommendation-card">
+                            <div class="rec-icon">🌬️</div>
+                            <h3>Airflow Optimization</h3>
+                            <p>Keep vents clear for 15% better efficiency</p>
+                            <button class="btn-secondary" onclick="showToast('Maintenance tips loaded!')">View Tips</button>
+                        </div>
+                        <div class="card recommendation-card">
+                            <div class="rec-icon">🌍</div>
+                            <h3>Eco Hours</h3>
+                            <p>Use fan mode during 6-9 AM & 6-9 PM</p>
+                            <button class="btn-secondary" onclick="activateEcoHours()">Enable</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== BUDGETING TAB ===== -->
+                <div id="budgeting-tab" class="tab-content">
+                    <!-- Budget Overview -->
+                    <div class="grid-2">
+                        <div class="card premium-card">
+                            <div class="card-header">
+                                <h2>Monthly Budget</h2>
+                            </div>
+                            <div class="card-body budget-overview">
+                                <div class="budget-display">
+                                    <div class="budget-circle">
+                                        <svg viewBox="0 0 100 100" id="budgetGauge">
+                                            <circle cx="50" cy="50" r="45" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+                                            <circle cx="50" cy="50" r="45" fill="none" stroke="#ff6b6b" stroke-width="8" 
+                                                    stroke-dasharray="70 188.4" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+                                        </svg>
+                                        <div class="budget-text">
+                                            <span class="budget-used" id="budgetUsed">₹1,240</span>
+                                            <span class="budget-total" id="budgetTotal">/ ₹2,000</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="btn-primary full-width" onclick="openBudgetModal()">Edit Budget</button>
+                            </div>
+                        </div>
+
+                        <div class="card premium-card">
+                            <div class="card-header">
+                                <h2>Remaining Budget</h2>
+                            </div>
+                            <div class="card-body">
+                                <div class="remaining-display">
+                                    <div class="remaining-amount" id="remainingAmount">₹760</div>
+                                    <div class="remaining-days">15 days left in month</div>
+                                    <div class="daily-average">
+                                        <span>Daily Average: </span>
+                                        <span class="daily-cost" id="dailyAverage">₹50.67</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Cost Breakdown -->
+                    <div class="card premium-card full-width">
+                        <div class="card-header">
+                            <h2>Daily Expenses (Last 7 Days)</h2>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="costChart" height="80"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Expense Categories -->
+                    <div class="grid-3">
+                        <div class="expense-card">
+                            <div class="expense-icon">🕐</div>
+                            <h3>Peak Hours</h3>
+                            <p class="expense-amount">₹450</p>
+                            <p class="expense-percent">36%</p>
+                        </div>
+                        <div class="expense-card">
+                            <div class="expense-icon">🌅</div>
+                            <h3>Off-Peak</h3>
+                            <p class="expense-amount">₹520</p>
+                            <p class="expense-percent">42%</p>
+                        </div>
+                        <div class="expense-card">
+                            <div class="expense-icon">🌙</div>
+                            <h3>Night Hours</h3>
+                            <p class="expense-amount">₹270</p>
+                            <p class="expense-percent">22%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== REPORTS TAB ===== -->
+                <div id="reports-tab" class="tab-content">
+                    <!-- Report Period Selector -->
+                    <div class="card premium-card full-width">
+                        <div class="card-header">
+                            <h2>Generate Reports</h2>
+                        </div>
+                        <div class="card-body report-controls">
+                            <div class="period-selector">
+                                <button class="period-btn active" onclick="generateReport('weekly')">Weekly</button>
+                                <button class="period-btn" onclick="generateReport('monthly')">Monthly</button>
+                                <button class="period-btn" onclick="generateReport('yearly')">Yearly</button>
+                            </div>
+                            <button class="btn-primary" onclick="downloadReport()">📥 Download PDF</button>
+                            <button class="btn-secondary" onclick="shareReport()">📧 Share Report</button>
+                        </div>
+                    </div>
+
+                    <!-- Report Preview -->
+                    <div class="card premium-card full-width">
+                        <div class="card-header">
+                            <h2 id="reportTitle">Weekly Report - March 5-11, 2025</h2>
+                        </div>
+                        <div class="card-body report-preview">
+                            <div class="report-section">
+                                <h3>Summary</h3>
+                                <div class="summary-grid">
+                                    <div class="summary-item">
+                                        <span class="summary-label">Total Usage</span>
+                                        <span class="summary-value" id="reportUsage">57.4 kWh</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span class="summary-label">Total Cost</span>
+                                        <span class="summary-value" id="reportCost">₹459.20</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span class="summary-label">Avg Daily</span>
+                                        <span class="summary-value" id="reportAvg">8.2 kWh</span>
+                                    </div>
+                                    <div class="summary-item">
+                                        <span class="summary-label">Efficiency</span>
+                                        <span class="summary-value" id="reportEff">A+</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="report-section">
+                                <h3>Daily Breakdown</h3>
+                                <table class="report-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Usage (kWh)</th>
+                                            <th>Cost (₹)</th>
+                                            <th>Peak Temp (°C)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reportTableBody">
+                                        <tr>
+                                            <td>Mon, Mar 5</td>
+                                            <td>8.5</td>
+                                            <td>₹68.00</td>
+                                            <td>24</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Tue, Mar 6</td>
+                                            <td>7.9</td>
+                                            <td>₹63.20</td>
+                                            <td>23</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Wed, Mar 7</td>
+                                            <td>9.2</td>
+                                            <td>₹73.60</td>
+                                            <td>25</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Thu, Mar 8</td>
+                                            <td>8.1</td>
+                                            <td>₹64.80</td>
+                                            <td>23</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Fri, Mar 9</td>
+                                            <td>8.7</td>
+                                            <td>₹69.60</td>
+                                            <td>24</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sat, Mar 10</td>
+                                            <td>7.4</td>
+                                            <td>₹59.20</td>
+                                            <td>22</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Sun, Mar 11</td>
+                                            <td>7.6</td>
+                                            <td>₹60.80</td>
+                                            <td>22</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="report-section">
+                                <h3>Insights & Recommendations</h3>
+                                <ul class="insights-list">
+                                    <li>✓ Your efficiency improved by 8% compared to last week</li>
+                                    <li>⚠ Peak usage detected on Wednesday (9.2 kWh) - consider pre-cooling</li>
+                                    <li>✓ Setting temperature to 24°C on weekdays would save ₹35/week</li>
+                                    <li>✓ Your AC is operating optimally with an A+ efficiency rating</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <footer class="main-footer">
+                <p>Smart AC Dashboard © 2025 | Last updated: <span id="lastUpdate">just now</span></p>
+            </footer>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
