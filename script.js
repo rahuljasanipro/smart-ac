@@ -4,11 +4,7 @@
 // ============================================
 
 const LG_AC_MODELS = [
-    { name: "LG Smart Inverter", code: "MS-Q24ENZA", emoji: "❄️" },
-    { name: "LG Dual Inverter", code: "MS-Q18UFOA", emoji: "🧊" },
-    { name: "LG AI Cool", code: "LS-Q18BWZA", emoji: "🤖" },
-    { name: "LG Eco Smart", code: "MS-Q19PMZA", emoji: "🌿" },
-    { name: "LG Ultra Quiet", code: "MS-Q22BEZA", emoji: "🔇" },
+    { name: "LG Smart Inverter AC", code: "MS-Q24ENZA", emoji: "❄️" },
 ];
 
 const state = {
